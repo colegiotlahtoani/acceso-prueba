@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Acceso QR (Demo)</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #f0f2f5;
+    }
+    h1 {
+      color: #333;
+    }
+    #reader {
+      margin: 20px auto;
+      width: 100%;
+      max-width: 400px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      font-size: 1.2em;
+      border-radius: 5px;
+      background-color: #e8f5e9; /* Verde claro para acceso permitido */
+      color: #2e7d32; /* Verde oscuro */
+      font-weight: bold;
+      display: inline-block;
+    }
+    #scan-again {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Control de Acceso QR</h1>
+  <p>Escanea tu código para verificar acceso</p>
+  <div id="reader"></div>
+  <div id="result"></div>
+  <button id="scan-again" onclick="restartScanner()">Escanear Nuevamente</button>
+
+  <script>
+    let qrScanner;
+
+    function accesoPermitido(codigo) {
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "✅ <strong>Acceso Permitido</strong><br>Código: " + codigo;
+      document.getElementById("scan-again").style.display = "block";
+    }
+
+    function restartScanner() {
+      document.getElementById("result").innerHTML = "";
+      document.getElementById("scan-again").style.display = "none";
+      startScanner();
+    }
+
+    function startScanner() {
+      qrScanner = new Html5Qrcode("reader");
+      const config = { fps: 10, qrbox: 250 };
+
+      qrScanner.start(
+        { facingMode: "environment" }, // Cámara trasera
+        config,
+        (decodedText) => {
+          accesoPermitido(decodedText);
+          qrScanner.stop();
+        },
+        (error) => {
+          // Ignorar errores de escaneo
+        }
+      ).catch(err => {
+        console.error("Error al iniciar escáner:", err);
+      });
+    }
+
+    // Iniciar el escáner al cargar la página
+    window.onload = startScanner;
+  </script>
+</body>
+</html>
