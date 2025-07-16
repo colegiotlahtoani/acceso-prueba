@@ -3,66 +3,147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Acceso QR (Demo)</title>
+  <title>Control de Acceso QR</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      background-color: #f0f2f5;
+    :root {
+      --primary: #00C853;
+      --dark: #007E33;
+      --light: #B9F6CA;
     }
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f9fa;
+      overflow: hidden;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
     h1 {
       color: #333;
+      font-weight: 300;
+      letter-spacing: 1px;
     }
+    
+    p {
+      color: #666;
+    }
+    
     #reader {
-      margin: 20px auto;
-      width: 100%;
+      width: 90%;
       max-width: 400px;
-      border: 2px solid #ddd;
-      border-radius: 10px;
+      height: 300px;
+      margin: 0 auto;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
+    
+    #result-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.95);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      animation: fadeIn 0.5s ease;
+    }
+    
     #result {
-      margin-top: 20px;
-      padding: 15px;
-      font-size: 1.2em;
-      border-radius: 5px;
-      background-color: #e8f5e9; /* Verde claro para acceso permitido */
-      color: #2e7d32; /* Verde oscuro */
+      font-size: 5rem;
       font-weight: bold;
-      display: inline-block;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 2rem;
     }
+    
+    .checkmark {
+      font-size: 8rem;
+      color: var(--primary);
+      animation: bounce 0.5s ease;
+    }
+    
     #scan-again {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #2196f3;
+      margin-top: 2rem;
+      padding: 12px 30px;
+      background-color: var(--primary);
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 50px;
+      font-size: 1rem;
       cursor: pointer;
-      display: none;
+      box-shadow: 0 4px 8px rgba(0, 200, 83, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    #scan-again:hover {
+      background-color: var(--dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 200, 83, 0.4);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+      40% {transform: translateY(-30px);}
+      60% {transform: translateY(-15px);}
+    }
+    
+    .footer {
+      position: fixed;
+      bottom: 20px;
+      color: #aaa;
+      font-size: 0.8rem;
     }
   </style>
 </head>
 <body>
-  <h1>Control de Acceso QR</h1>
-  <p>Escanea tu código para verificar acceso</p>
+  <div class="header">
+    <h1>Control de Acceso</h1>
+    <p>Escanea tu código QR para verificación</p>
+  </div>
+  
   <div id="reader"></div>
-  <div id="result"></div>
-  <button id="scan-again" onclick="restartScanner()">Escanear Nuevamente</button>
+  
+  <div id="result-container">
+    <div class="checkmark">✅</div>
+    <div id="result">ACCESO</div>
+    <button id="scan-again" onclick="restartScanner()">ESCANEAR NUEVAMENTE</button>
+  </div>
+  
+  <div class="footer">Sistema de Control de Acceso</div>
 
   <script>
     let qrScanner;
 
-    function accesoPermitido(codigo) {
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "✅ <strong>Acceso Permitido</strong><br>Código: " + codigo;
+    function accesoPermitido() {
+      const resultContainer = document.getElementById("result-container");
+      resultContainer.style.display = "flex";
       document.getElementById("scan-again").style.display = "block";
     }
 
     function restartScanner() {
-      document.getElementById("result").innerHTML = "";
-      document.getElementById("scan-again").style.display = "none";
+      document.getElementById("result-container").style.display = "none";
       startScanner();
     }
 
@@ -71,10 +152,10 @@
       const config = { fps: 10, qrbox: 250 };
 
       qrScanner.start(
-        { facingMode: "environment" }, // Cámara trasera
+        { facingMode: "environment" },
         config,
         (decodedText) => {
-          accesoPermitido(decodedText);
+          accesoPermitido();
           qrScanner.stop();
         },
         (error) => {
