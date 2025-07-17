@@ -42,12 +42,28 @@
     
     #reader {
       width: 90%;
-      max-width: 400px;
-      height: 300px;
+      max-width: 500px;
+      height: 400px;
       margin: 0 auto;
       border-radius: 16px;
       overflow: hidden;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    
+    /* Estilo para el cuadro de escaneo */
+    #reader::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 60%;
+      border: 4px solid var(--primary);
+      border-radius: 8px;
+      box-sizing: border-box;
+      pointer-events: none;
     }
     
     #result-container {
@@ -149,7 +165,15 @@
 
     function startScanner() {
       qrScanner = new Html5Qrcode("reader");
-      const config = { fps: 10, qrbox: 250 };
+      // Aumentamos el tamaño del área de escaneo
+      const config = { 
+        fps: 10, 
+        qrbox: { 
+          width: 350,  // Ancho más grande
+          height: 250 // Alto más grande
+        },
+        aspectRatio: 1.0 // Relación de aspecto rectangular
+      };
 
       qrScanner.start(
         { facingMode: "environment" },
