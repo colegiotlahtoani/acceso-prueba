@@ -15,36 +15,41 @@
     body {
       font-family: 'Arial', sans-serif;
       margin: 0;
-      padding: 0;
+      padding: 20px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       background-color: #f8f9fa;
+      box-sizing: border-box;
     }
     
     .header {
       text-align: center;
-      margin-bottom: 1rem;
-      padding: 0 20px;
+      margin-bottom: 1.5rem;
+      width: 100%;
     }
     
     h1 {
       color: #333;
       font-weight: 300;
-      font-size: clamp(1.5rem, 4vw, 2rem); /* Texto responsive */
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      margin: 0;
     }
     
     p {
       color: #666;
       font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+      margin: 0.5rem 0 0;
     }
     
+    /* Contenedor del escáner - CUADRADO PERFECTO */
     #reader {
-      width: 90%;
+      width: 90vmin; /* Usamos vmin para adaptarse al dispositivo */
+      height: 90vmin; /* Mismo valor que width = cuadrado */
       max-width: 500px;
-      aspect-ratio: 1; /* FORZAMOS RELACIÓN CUADRADA */
+      max-height: 500px;
       margin: 0 auto;
       border-radius: 16px;
       overflow: hidden;
@@ -52,21 +57,22 @@
       position: relative;
     }
     
-    /* Cuadro de escaneo CENTRADO y CUADRADO */
+    /* Cuadro de escaneo - GRANDE y CUADRADO */
     #reader::after {
       content: "";
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 70%;
-      height: 70%; /* Mismo alto/ancho = cuadrado */
+      width: 80%;
+      height: 80%; /* Mismo % para cuadrado */
       border: 4px solid var(--primary);
       border-radius: 8px;
       box-sizing: border-box;
       pointer-events: none;
     }
     
+    /* Estilos para el resultado (igual que antes) */
     #result-container {
       position: fixed;
       top: 0;
@@ -83,7 +89,7 @@
     }
     
     #result {
-      font-size: clamp(3rem, 10vw, 5rem); /* Texto responsive */
+      font-size: clamp(3rem, 10vw, 5rem);
       font-weight: bold;
       color: var(--primary);
       text-align: center;
@@ -91,7 +97,7 @@
     }
     
     .checkmark {
-      font-size: clamp(5rem, 15vw, 8rem); /* Icono responsive */
+      font-size: clamp(5rem, 15vw, 8rem);
       color: var(--primary);
       animation: bounce 0.5s ease;
     }
@@ -115,6 +121,13 @@
       box-shadow: 0 6px 12px rgba(0, 200, 83, 0.4);
     }
     
+    .footer {
+      margin-top: 2rem;
+      color: #aaa;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+    
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -124,14 +137,6 @@
       0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
       40% {transform: translateY(-30px);}
       60% {transform: translateY(-15px);}
-    }
-    
-    .footer {
-      margin-top: 2rem;
-      color: #aaa;
-      font-size: 0.8rem;
-      text-align: center;
-      padding: 0 20px;
     }
   </style>
 </head>
@@ -157,7 +162,6 @@
     function accesoPermitido() {
       const resultContainer = document.getElementById("result-container");
       resultContainer.style.display = "flex";
-      document.getElementById("scan-again").style.display = "block";
     }
 
     function restartScanner() {
@@ -168,38 +172,38 @@
     function startScanner() {
       qrScanner = new Html5Qrcode("reader");
       
-      // Configuración OPTIMIZADA para tablets/móviles
+      // Configuración OPTIMIZADA para iPad/Tablets
+      const qrboxSize = Math.min(300, window.innerWidth * 0.6); // Ajusta el tamaño al dispositivo
+      
       const config = { 
-        fps: 10, 
-        qrbox: { 
-          width: 250,  // Tamaño fijo (se adapta al cuadro visual)
-          height: 250 // Cuadrado perfecto
+        fps: 10,
+        qrbox: {
+          width: qrboxSize,
+          height: qrboxSize // CUADRADO PERFECTO
         },
-        aspectRatio: 1.0 // Relación 1:1 (cuadrado)
+        aspectRatio: 1.0
       };
 
       qrScanner.start(
         { facingMode: "environment" },
         config,
         (decodedText) => {
-          // Aquí puedes validar el contenido del QR si es necesario
-          // Ejemplo: if (decodedText === "CODIGO_VALIDO") { ... }
           accesoPermitido();
           qrScanner.stop();
         },
         (error) => {
-          console.log("Error de escaneo:", error); // Opcional: mostrar feedback al usuario
+          console.log("Error de escaneo:", error);
         }
       ).catch(err => {
         console.error("Error al iniciar escáner:", err);
-        alert("No se pudo acceder a la cámara. Asegúrate de permitir los permisos.");
+        alert("No se pudo acceder a la cámara. Permite los permisos.");
       });
     }
 
-    // Iniciar al cargar + redimensionar para tablets
+    // Iniciar al cargar y al redimensionar (para iPad en modo horizontal/vertical)
     window.onload = startScanner;
     window.addEventListener('resize', () => {
-      if (qrScanner && !document.getElementById("result-container").style.display === "flex") {
+      if (qrScanner && document.getElementById("result-container").style.display !== "flex") {
         qrScanner.stop().then(() => startScanner());
       }
     });
