@@ -1,212 +1,174 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Acceso QR</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <style>
-    :root {
-      --primary: #00C853;
-      --dark: #007E33;
-      --light: #B9F6CA;
-    }
-    
-    body {
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 20px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background-color: #f8f9fa;
-      box-sizing: border-box;
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      width: 100%;
-    }
-    
-    h1 {
-      color: #333;
-      font-weight: 300;
-      font-size: clamp(1.5rem, 4vw, 2rem);
-      margin: 0;
-    }
-    
-    p {
-      color: #666;
-      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-      margin: 0.5rem 0 0;
-    }
-    
-    /* Contenedor del escáner - CUADRADO PERFECTO */
-    #reader {
-      width: 90vmin; /* Usamos vmin para adaptarse al dispositivo */
-      height: 90vmin; /* Mismo valor que width = cuadrado */
-      max-width: 500px;
-      max-height: 500px;
-      margin: 0 auto;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      position: relative;
-    }
-    
-    /* Cuadro de escaneo - GRANDE y CUADRADO */
-    #reader::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      height: 80%; /* Mismo % para cuadrado */
-      border: 4px solid var(--primary);
-      border-radius: 8px;
-      box-sizing: border-box;
-      pointer-events: none;
-    }
-    
-    /* Estilos para el resultado (igual que antes) */
-    #result-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(255, 255, 255, 0.95);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      animation: fadeIn 0.5s ease;
-    }
-    
-    #result {
-      font-size: clamp(3rem, 10vw, 5rem);
-      font-weight: bold;
-      color: var(--primary);
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .checkmark {
-      font-size: clamp(5rem, 15vw, 8rem);
-      color: var(--primary);
-      animation: bounce 0.5s ease;
-    }
-    
-    #scan-again {
-      margin-top: 2rem;
-      padding: 12px 30px;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0, 200, 83, 0.3);
-      transition: all 0.3s ease;
-    }
-    
-    #scan-again:hover {
-      background-color: var(--dark);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 200, 83, 0.4);
-    }
-    
-    .footer {
-      margin-top: 2rem;
-      color: #aaa;
-      font-size: 0.8rem;
-      text-align: center;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-      40% {transform: translateY(-30px);}
-      60% {transform: translateY(-15px);}
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Acceso QR</title>
+    <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.1/qr-scanner.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        #scanner-container {
+            width: 100%;
+            height: 300px;
+            margin: 0 auto;
+            position: relative;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        #scanner-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .valid {
+            color: #28a745;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .checkmark {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        #scan-another {
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            #scanner-container {
+                height: 250px;
+            }
+            
+            .checkmark {
+                font-size: 60px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Control de Acceso</h1>
-    <p>Escanea tu código QR para verificación</p>
-  </div>
-  
-  <div id="reader"></div>
-  
-  <div id="result-container">
-    <div class="checkmark">✅</div>
-    <div id="result">ACCESO</div>
-    <button id="scan-again" onclick="restartScanner()">ESCANEAR NUEVAMENTE</button>
-  </div>
-  
-  <div class="footer">Sistema de Control de Acceso</div>
+    <div class="container">
+        <h1>Control de Acceso</h1>
+        <p>Escanea tu código QR para verificación</p>
+        
+        <div id="scanner-container"></div>
+        
+        <div id="result">
+            <div class="checkmark">✓</div>
+            <div class="valid">VÁLIDO</div>
+        </div>
+        
+        <button id="scan-another">Escanear otro código</button>
+    </div>
 
-  <script>
-    let qrScanner;
-
-    function accesoPermitido() {
-      const resultContainer = document.getElementById("result-container");
-      resultContainer.style.display = "flex";
-    }
-
-    function restartScanner() {
-      document.getElementById("result-container").style.display = "none";
-      startScanner();
-    }
-
-    function startScanner() {
-      qrScanner = new Html5Qrcode("reader");
-      
-      // Configuración OPTIMIZADA para iPad/Tablets
-      const qrboxSize = Math.min(300, window.innerWidth * 0.6); // Ajusta el tamaño al dispositivo
-      
-      const config = { 
-        fps: 10,
-        qrbox: {
-          width: qrboxSize,
-          height: qrboxSize // CUADRADO PERFECTO
-        },
-        aspectRatio: 1.0
-      };
-
-      qrScanner.start(
-        { facingMode: "environment" },
-        config,
-        (decodedText) => {
-          accesoPermitido();
-          qrScanner.stop();
-        },
-        (error) => {
-          console.log("Error de escaneo:", error);
+    <script>
+        const scannerContainer = document.getElementById('scanner-container');
+        const resultDiv = document.getElementById('result');
+        const scanAnotherBtn = document.getElementById('scan-another');
+        let qrScanner;
+        
+        // Función para iniciar el escáner
+        function startScanner() {
+            // Ocultar resultado y botón
+            resultDiv.style.display = 'none';
+            scanAnotherBtn.style.display = 'none';
+            
+            // Limpiar el contenedor del escáner
+            scannerContainer.innerHTML = '';
+            
+            // Crear una instancia del escáner QR
+            qrScanner = new QrScanner(
+                scannerContainer,
+                result => {
+                    // Mostrar resultado válido
+                    scannerContainer.style.display = 'none';
+                    resultDiv.style.display = 'block';
+                    scanAnotherBtn.style.display = 'block';
+                    
+                    // Detener el escáner
+                    qrScanner.stop();
+                },
+                {
+                    preferredCamera: 'environment',
+                    highlightScanRegion: true,
+                    highlightCodeOutline: true,
+                    maxScansPerSecond: 5,
+                }
+            );
+            
+            // Iniciar el escáner
+            qrScanner.start();
         }
-      ).catch(err => {
-        console.error("Error al iniciar escáner:", err);
-        alert("No se pudo acceder a la cámara. Permite los permisos.");
-      });
-    }
-
-    // Iniciar al cargar y al redimensionar (para iPad en modo horizontal/vertical)
-    window.onload = startScanner;
-    window.addEventListener('resize', () => {
-      if (qrScanner && document.getElementById("result-container").style.display !== "flex") {
-        qrScanner.stop().then(() => startScanner());
-      }
-    });
-  </script>
+        
+        // Escuchar clic en el botón "Escanear otro código"
+        scanAnotherBtn.addEventListener('click', startScanner);
+        
+        // Iniciar el escáner cuando la página carga
+        window.addEventListener('load', startScanner);
+        
+        // Manejar cambios en la orientación para dispositivos móviles
+        window.addEventListener('orientationchange', () => {
+            if (qrScanner) {
+                qrScanner.stop().then(() => qrScanner.start());
+            }
+        });
+    </script>
 </body>
 </html>
